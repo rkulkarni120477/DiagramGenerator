@@ -531,7 +531,8 @@ label {
   margin: 6px 0 0;
 }
 
-.mermaid-output svg {
+.mermaid-output svg,
+.layered-output svg {
   max-width: none;
   height: auto;
   background: #fff;

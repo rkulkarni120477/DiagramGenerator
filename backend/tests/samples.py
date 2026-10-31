@@ -61,6 +61,37 @@ RACI_DIAGRAM = json.dumps(
     }
 )
 
+LAYERED_DIAGRAM = json.dumps(
+    {
+        "status": "diagram",
+        "diagram_type": "layered",
+        "title": "Web application layers",
+        "format": "layered_stack",
+        "entry_point": "Request",
+        "layers": [
+            {
+                "name": "Presentation Layer",
+                "closed": True,
+                "components": [{"name": "Web UI"}, {"name": "Admin UI"}],
+            },
+            {
+                "name": "Business Layer",
+                "closed": True,
+                "components": [{"name": "Order service"}, {"name": "Pricing service"}],
+            },
+            {
+                "name": "Database Layer",
+                "closed": True,
+                "components": [{"name": "Orders DB", "kind": "database"}],
+            },
+        ],
+        "cross_cutting": [{"name": "Security", "components": [{"name": "Auth"}]}],
+        "assumptions": ["Single region"],
+        "constraints_applied": [],
+        "notes": None,
+    }
+)
+
 RACI_TWO_ACCOUNTABLE = json.dumps(
     {
         "status": "diagram",

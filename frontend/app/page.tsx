@@ -12,6 +12,8 @@ import { SessionList } from "@/components/SessionList";
 import { ProgressPanel } from "@/components/ProgressPanel";
 import { api, messageOf, newProgressId } from "@/lib/api";
 import { copyPngToClipboard, copyText, downloadJpg } from "@/lib/export";
+import { LayeredView } from "@/components/LayeredView";
+import { buildLayeredSvg } from "@/lib/layered";
 import { buildRaciSvg } from "@/lib/raci";
 import { SamplePrompts } from "@/components/SamplePrompts";
 import {
@@ -182,7 +184,9 @@ export default function Home() {
   const exportSvg = diagramTurn
     ? diagramTurn.format === "raci_matrix"
       ? buildRaciSvg(diagramTurn)
-      : renderedSvg
+      : diagramTurn.format === "layered_stack"
+        ? buildLayeredSvg(diagramTurn)
+        : renderedSvg
     : null;
   const fileName = `${diagramType}-diagram-${today()}.jpg`;
 
@@ -257,6 +261,8 @@ export default function Home() {
         <DiagramCanvas resetKey={String(diagramId)}>
           {turn.format === "raci_matrix" ? (
             <RaciTable turn={turn} />
+          ) : turn.format === "layered_stack" ? (
+            <LayeredView turn={turn} />
           ) : (
             <MermaidDiagram
               key={diagramId ?? "none"}

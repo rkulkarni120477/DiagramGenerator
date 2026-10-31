@@ -1,6 +1,6 @@
 import json
 
-from app.schemas import AgentTurn, ClarificationTurn, MermaidDiagram, RaciDiagram
+from app.schemas import AgentTurn, ClarificationTurn, LayeredDiagram, MermaidDiagram, RaciDiagram
 
 
 def parse_agent_turn(raw: str) -> AgentTurn:
@@ -19,5 +19,7 @@ def parse_agent_turn(raw: str) -> AgentTurn:
     if status == "diagram":
         if data.get("format") == "raci_matrix":
             return RaciDiagram.model_validate(data)
+        if data.get("format") == "layered_stack":
+            return LayeredDiagram.model_validate(data)
         return MermaidDiagram.model_validate(data)
     raise ValueError(f"unknown status {status!r}")

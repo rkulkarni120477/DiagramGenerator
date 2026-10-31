@@ -1,7 +1,8 @@
-export type DiagramType = "technical" | "logical" | "network" | "raci" | "workflow";
+export type DiagramType = "technical" | "layered" | "logical" | "network" | "raci" | "workflow";
 
 export const DIAGRAM_TYPES: { value: DiagramType; label: string }[] = [
   { value: "technical", label: "Technical" },
+  { value: "layered", label: "Layered" },
   { value: "logical", label: "Logical" },
   { value: "network", label: "Network" },
   { value: "raci", label: "RACI" },
@@ -35,7 +36,7 @@ interface DiagramBase {
 }
 
 export interface MermaidDiagram extends DiagramBase {
-  diagram_type: Exclude<DiagramType, "raci">;
+  diagram_type: Exclude<DiagramType, "raci" | "layered">;
   format: "mermaid";
   mermaid: string;
 }
@@ -52,7 +53,37 @@ export interface RaciDiagram extends DiagramBase {
   tasks: RaciTask[];
 }
 
-export type DiagramTurn = MermaidDiagram | RaciDiagram;
+export interface LayerComponent {
+  name: string;
+  kind: "component" | "database";
+}
+
+export interface Layer {
+  name: string;
+  closed: boolean;
+  components: LayerComponent[];
+}
+
+export interface CrossCuttingConcern {
+  name: string;
+  components: LayerComponent[];
+}
+
+export interface HostingInfo {
+  provider: string;
+  region?: string | null;
+}
+
+export interface LayeredDiagram extends DiagramBase {
+  diagram_type: "layered";
+  format: "layered_stack";
+  entry_point: string;
+  hosting?: HostingInfo | null;
+  layers: Layer[];
+  cross_cutting: CrossCuttingConcern[];
+}
+
+export type DiagramTurn = MermaidDiagram | RaciDiagram | LayeredDiagram;
 export type AgentTurn = ClarificationTurn | DiagramTurn;
 
 export interface TurnResponse {

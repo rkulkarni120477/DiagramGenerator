@@ -10,7 +10,7 @@ def _ensure_utc(value: datetime) -> datetime:
 
 UtcDatetime = Annotated[datetime, AfterValidator(_ensure_utc)]
 
-DiagramType = Literal["technical", "logical", "network", "raci", "workflow"]
+DiagramType = Literal["technical", "layered", "logical", "network", "raci", "workflow"]
 RaciCode = Literal["R", "A", "C", "I", "A/R"]
 
 
@@ -54,6 +54,45 @@ class MermaidDiagram(BaseModel):
     notes: str | None = None
 
 
+class LayerComponent(BaseModel):
+    name: str = Field(min_length=1)
+    kind: Literal["component", "database"] = "component"
+
+
+class Layer(BaseModel):
+    name: str = Field(min_length=1)
+    closed: bool = True
+    components: list[LayerComponent] = Field(min_length=1, max_length=8)
+
+
+class CrossCuttingConcern(BaseModel):
+    name: str = Field(min_length=1)
+    components: list[LayerComponent] = Field(min_length=1, max_length=8)
+
+
+class HostingInfo(BaseModel):
+    """Where the system runs, shown as a badge on the diagram."""
+
+    provider: str = Field(min_length=1, max_length=60, description="For example AWS, Microsoft Azure, Google Cloud, On-premises")
+    region: str | None = None
+
+
+class LayeredDiagram(BaseModel):
+    """Stacked layers with components, closed or open layer markers and cross-cutting concerns."""
+
+    status: Literal["diagram"]
+    diagram_type: Literal["layered"]
+    title: str = Field(min_length=1, max_length=200)
+    format: Literal["layered_stack"]
+    entry_point: str = "Request"
+    hosting: HostingInfo | None = None
+    layers: list[Layer] = Field(min_length=1, max_length=8)
+    cross_cutting: list[CrossCuttingConcern] = Field(default_factory=list, max_length=6)
+    assumptions: list[str] = Field(default_factory=list)
+    constraints_applied: list[str] = Field(default_factory=list)
+    notes: str | None = None
+
+
 class RaciTask(BaseModel):
     task: str = Field(min_length=1)
     assignments: dict[str, RaciCode]
@@ -90,7 +129,7 @@ class RaciDiagram(BaseModel):
         return self
 
 
-AgentTurn = ClarificationTurn | MermaidDiagram | RaciDiagram
+AgentTurn = ClarificationTurn | MermaidDiagram | RaciDiagram | LayeredDiagram
 
 
 # ---- Responses ------------------------------------------------------------

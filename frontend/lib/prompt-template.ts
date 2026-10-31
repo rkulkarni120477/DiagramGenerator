@@ -52,6 +52,38 @@ export const TEMPLATES: Record<DiagramType, string> = {
 ## Additional information
 `,
 
+  layered: `## System
+- Name and purpose:
+- Layers, top to bottom (for example presentation, API, services, data, infrastructure):
+- Components inside each layer:
+- Users and how they access the system:
+
+## Cross-cutting concerns
+- Authentication and authorization:
+- Logging, monitoring and auditing:
+- Shared services (caching, messaging, search):
+
+## Technologies and hosting
+- Technologies per layer:
+- Cloud provider and hosting:
+- AI provider (if any):
+
+## Data and integrations
+- Data stores:
+- External integrations (APIs, SaaS, identity provider):
+
+## Assumptions
+-
+
+## Constraints
+- Budget:
+- Compliance and security:
+- Performance targets:
+- Existing systems to keep:
+
+## Additional information
+`,
+
   network: `## Environments
 - Environments (for example: dev, staging, prod):
 - Cloud provider and regions:
@@ -235,6 +267,76 @@ Show the layers from user-facing features down to core business rules.
 ## Constraints
 - Compliance and security: Regulated insurance data; full audit trail required
 - Existing systems to keep: Legacy policy administration system (read-only access)
+
+## Additional information
+`,
+    },
+  ],
+
+  layered: [
+    {
+      title: "Layered web application",
+      description: "Presentation, API, service and data layers on AWS",
+      prompt: `## System
+- Name and purpose: Customer self-service portal for a utility company
+- Layers, top to bottom: Presentation (web app), API (REST gateway), Services (billing, usage, account), Data (PostgreSQL, S3), Infrastructure (AWS)
+- Components inside each layer: Presentation has the Next.js app and admin pages; API has the gateway and rate limiting; Services has billing, usage and account services; Data has PostgreSQL and document storage
+- Users and how they access the system: Customers and staff over HTTPS through the browser
+
+## Cross-cutting concerns
+- Authentication and authorization: Amazon Cognito with role-based access
+- Logging, monitoring and auditing: CloudWatch logs and metrics, audit table for billing changes
+- Shared services: Redis cache for usage summaries, SQS for background jobs
+
+## Technologies and hosting
+- Technologies per layer: Next.js, FastAPI, PostgreSQL, S3
+- Cloud provider and hosting: AWS, containers on ECS Fargate
+- AI provider (if any): None
+
+## Data and integrations
+- Data stores: RDS PostgreSQL, S3 for bills (PDF)
+- External integrations: Meter data feed (SFTP) from the utility network
+
+## Assumptions
+- Single region (eu-west-1)
+
+## Constraints
+- Budget: Moderate
+- Compliance and security: Customer data encrypted at rest and in transit
+- Performance targets: Dashboard loads in under 2 seconds
+
+## Additional information
+`,
+    },
+    {
+      title: "Layered data platform",
+      description: "Ingestion, storage, processing and serving layers",
+      prompt: `## System
+- Name and purpose: Analytics platform for sales and inventory data
+- Layers, top to bottom: Serving (BI dashboards, query API), Processing (transformations), Storage (raw, curated, warehouse), Ingestion (connectors), Infrastructure (AWS)
+- Components inside each layer: Serving has QuickSight and a query API; Processing has Glue jobs and dbt models; Storage has S3 raw and curated zones plus Redshift; Ingestion has Kinesis and scheduled connectors
+- Users and how they access the system: Analysts through QuickSight; data engineers through the console and CI pipelines
+
+## Cross-cutting concerns
+- Authentication and authorization: IAM Identity Center, column-level permissions in Redshift
+- Logging, monitoring and auditing: CloudTrail and CloudWatch, lineage in the catalog
+- Shared services: Glue Data Catalog, Secrets Manager
+
+## Technologies and hosting
+- Technologies per layer: Kinesis, Glue, dbt, Redshift, QuickSight
+- Cloud provider and hosting: AWS, us-east-1
+- AI provider (if any): None
+
+## Data and integrations
+- Data stores: S3 data lake, Redshift warehouse
+- External integrations: Salesforce and the ERP system via scheduled connectors
+
+## Assumptions
+- Data volume is about 200 GB per month
+
+## Constraints
+- Compliance and security: Personal data masked in the curated zone
+- Budget: Keep monthly cost under a fixed amount
 
 ## Additional information
 `,

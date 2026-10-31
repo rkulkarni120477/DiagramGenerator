@@ -3,9 +3,10 @@ import json
 import pytest
 
 from app.parsing import parse_agent_turn
-from app.schemas import ClarificationTurn, MermaidDiagram, RaciDiagram
+from app.schemas import ClarificationTurn, LayeredDiagram, MermaidDiagram, RaciDiagram
 from tests.samples import (
     CLARIFICATION,
+    LAYERED_DIAGRAM,
     MERMAID_DIAGRAM,
     RACI_DIAGRAM,
     RACI_NO_RESPONSIBLE,
@@ -15,6 +16,17 @@ from tests.samples import (
 
 def test_parses_mermaid_diagram():
     assert isinstance(parse_agent_turn(MERMAID_DIAGRAM), MermaidDiagram)
+
+
+def test_parses_layered_diagram():
+    assert isinstance(parse_agent_turn(LAYERED_DIAGRAM), LayeredDiagram)
+
+
+def test_layered_diagram_needs_components_in_each_layer():
+    data = json.loads(LAYERED_DIAGRAM)
+    data["layers"][0]["components"] = []
+    with pytest.raises(ValueError):
+        parse_agent_turn(json.dumps(data))
 
 
 def test_parses_clarification():

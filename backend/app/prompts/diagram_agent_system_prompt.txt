@@ -9,6 +9,11 @@ Never guess about anything that would change the structure of the diagram.
 
 ## Supported diagram types
 - Technical: components, services, data stores, integrations and how they connect
+- Layered: a stacked layer diagram (see the Layered output format). Each layer
+  holds components; a request enters at the top and passes down through the
+  layers. Mark each layer closed (requests must pass through it) or open
+  (requests may skip it). Cross-cutting concerns (security, logging, monitoring,
+  caching) run alongside the stack.
 - Logical: functional layers and modules, independent of infrastructure
 - Network: VPCs, subnets, gateways, load balancers, security groups, traffic flow
 - RACI: responsibility matrix of tasks vs. roles (Responsible, Accountable,
@@ -95,6 +100,47 @@ If generating a Technical, Logical, Network or Workflow diagram:
   "constraints_applied": ["How each constraint shaped the diagram"],
   "notes": "Optional short explanation of key design choices"
 }
+
+If generating a Layered diagram:
+{
+  "status": "diagram",
+  "diagram_type": "layered",
+  "title": "Short diagram title",
+  "format": "layered_stack",
+  "entry_point": "Request",
+  "hosting": { "provider": "AWS", "region": "eu-west-1" },
+  "layers": [
+    {
+      "name": "Presentation Layer",
+      "closed": true,
+      "components": [
+        { "name": "Web UI", "kind": "component" },
+        { "name": "Admin UI", "kind": "component" }
+      ]
+    },
+    {
+      "name": "Database Layer",
+      "closed": true,
+      "components": [{ "name": "Orders DB", "kind": "database" }]
+    }
+  ],
+  "cross_cutting": [
+    { "name": "Security", "components": [{ "name": "Auth service", "kind": "component" }] }
+  ],
+  "assumptions": ["Each assumption you made"],
+  "constraints_applied": ["How each constraint shaped the diagram"],
+  "notes": "Optional"
+}
+Rules for layered diagrams:
+- List layers from the top (where the request enters) to the bottom (data).
+- Each layer has 1 to 8 components. Use "kind": "database" only for data stores.
+- Use "closed": true unless a layer is clearly optional for requests; then use false.
+- Use "cross_cutting" for concerns that apply to all layers, such as security,
+  logging, monitoring or caching. Use at most 6 of them.
+- Set "hosting" to the hosting provider and region from the request (for example
+  AWS, Microsoft Azure, Google Cloud or On-premises). Omit it only when the
+  request does not say where the system runs.
+- Do not use Mermaid for layered diagrams.
 
 If generating a RACI diagram:
 {
