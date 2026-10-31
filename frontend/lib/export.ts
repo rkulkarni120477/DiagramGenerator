@@ -96,30 +96,24 @@ type SaveFilePicker = (options: {
  * On browsers without showSaveFilePicker (Firefox, Safari) it falls back to a normal download.
  */
 export async function downloadJpg(svg: string, suggestedName: string): Promise<boolean> {
+  // Convert the diagram to JPG first, so the Save As dialog opens with the file already ready.
+  const canvas = await svgToCanvas(svg);
+  const blob = await canvasToBlob(canvas, "image/jpeg", 0.95);
+
   const picker = (window as unknown as { showSaveFilePicker?: SaveFilePicker }).showSaveFilePicker;
-
-  // The picker must open synchronously inside the click, before any await, so the browser
-  // still considers the user gesture active.
-  let handlePromise: Promise<SaveFileHandle> | null = null;
-  if (picker) {
-    handlePromise = picker({
-      suggestedName,
-      types: [{ description: "JPEG image", accept: { "image/jpeg": [".jpg"] } }],
-    });
-  }
-
   let handle: SaveFileHandle | null = null;
-  if (handlePromise) {
+  if (picker) {
     try {
-      handle = await handlePromise;
+      handle = await picker({
+        suggestedName,
+        types: [{ description: "JPEG image", accept: { "image/jpeg": [".jpg"] } }],
+      });
     } catch (err) {
+      // Cancelling the dialog is not an error.
       if (err instanceof DOMException && err.name === "AbortError") return false;
       throw err;
     }
   }
-
-  const canvas = await svgToCanvas(svg);
-  const blob = await canvasToBlob(canvas, "image/jpeg", 0.95);
 
   if (handle) {
     const writable = await handle.createWritable();
