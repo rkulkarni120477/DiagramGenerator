@@ -11,9 +11,38 @@ interface PreparedSvg {
   markup: string;
 }
 
-/** Gives the SVG explicit pixel dimensions taken from its viewBox. */
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/**
+ * Mermaid still uses <foreignObject> (HTML) for some labels, such as edge labels. Browsers taint
+ * a canvas that draws those, so they cannot be exported. Replace each one with an SVG text element
+ * centered on the same box.
+ */
+function replaceForeignObjects(doc: Document): void {
+  for (const element of Array.from(doc.getElementsByTagName("foreignObject"))) {
+    const x = Number(element.getAttribute("x") ?? 0);
+    const y = Number(element.getAttribute("y") ?? 0);
+    const width = Number(element.getAttribute("width") ?? 0);
+    const height = Number(element.getAttribute("height") ?? 0);
+
+    const text = doc.createElementNS(SVG_NS, "text");
+    text.setAttribute("x", String(x + width / 2));
+    text.setAttribute("y", String(y + height / 2));
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle");
+    text.setAttribute("font-family", "Segoe UI, Roboto, Helvetica, Arial, sans-serif");
+    text.setAttribute("font-size", "16");
+    text.setAttribute("fill", "#1f2937");
+    text.textContent = (element.textContent ?? "").replace(/\s+/g, " ").trim();
+
+    element.parentNode?.replaceChild(text, element);
+  }
+}
+
+/** Gives the SVG explicit pixel dimensions taken from its viewBox and removes HTML labels. */
 export function prepareSvg(svg: string): PreparedSvg {
   const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+  replaceForeignObjects(doc);
   const root = doc.documentElement;
   const viewBox = root.getAttribute("viewBox")?.trim().split(/[\s,]+/).map(Number);
   const width = viewBox && viewBox.length === 4 ? viewBox[2] : Number(root.getAttribute("width")) || 1000;
